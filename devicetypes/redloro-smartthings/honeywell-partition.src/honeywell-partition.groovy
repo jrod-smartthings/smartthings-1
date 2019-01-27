@@ -19,6 +19,8 @@ metadata {
     capability "Sensor"
     capability "Actuator"
     
+    attribute "dscpartition", "enum", ["ready", "notready", "arming", "armedstay", "armedaway", "armedinstant", "armedmax", "alarmcleared", "alarm"]
+    
     command "partition"
     command "armStay"
     command "armAway"
