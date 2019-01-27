@@ -19,7 +19,7 @@ definition(
   namespace: "redloro-smartthings",
   author: "redloro@gmail.com",
   description: "Honeywell Security SmartApp",
-  category: "My Apps",
+  category: "Safety & Security",
   iconUrl: "https://raw.githubusercontent.com/redloro/smartthings/master/images/honeywell-security.png",
   iconX2Url: "https://raw.githubusercontent.com/redloro/smartthings/master/images/honeywell-security.png",
   iconX3Url: "https://raw.githubusercontent.com/redloro/smartthings/master/images/honeywell-security.png",
@@ -43,7 +43,8 @@ def page1() {
     section("Honeywell Panel") {
       input name: "pluginType", type: "enum", title: "Plugin Type", required: true, submitOnChange: true, options: ["envisalink", "ad2usb"]
       input "securityCode", "password", title: "Security Code", description: "User code to arm/disarm the security panel", required: false
-      input "enableDiscovery", "bool", title: "Discover Zones (WARNING: all existing zones will be removed)", required: false, defaultValue: false
+      input "resetZones", "bool", title: "Delete Existing Partitions/Zones During Discovery (WARNING: all existing zones will be removed)", required: false, defaultValue: false
+      input "enableDiscovery", "bool", title: "Discover Zones", required: false, defaultValue: false
     }
 
     if (pluginType == "envisalink") {
@@ -74,8 +75,9 @@ def uninstalled() {
 }
 
 def updated() {
-  if (settings.enableDiscovery) {
+  if (settings.enableDiscovery && settings.resetZones) {
     //remove child devices as we will reload
+    log.trace "Deleting all existing partitions and zones to prepare for fresh discovery."
     removeChildDevices()
   }
 
@@ -94,7 +96,7 @@ def updated() {
 
   if (settings.enableDiscovery) {
     //delay discovery for 5 seconds
-    runIn(5, discoverChildDevices)
+    runIn(2, discoverChildDevices)
     settings.enableDiscovery = false
   }
 }
@@ -168,16 +170,26 @@ private processEvent(evt) {
   }
   if (evt.type == "partition") {
     updatePartitions(evt.partition, evt.state, evt.alpha)
-    updateAlarmSystemStatus(evt.state)
+    //log.trace "Partition number ${evt.partition} reported status of ${evt.state}"
+    if (evt.partition == 1) {
+        updateAlarmSystemStatus(evt.state)
+    }
   }
 }
 
 private addChildDevices(partitions, zones) {
+  def oldChildren = getChildDevices()
+  log.debug("Existing children: ${oldChildren}")
+  
+  
   partitions.each {
     def deviceId = 'honeywell|partition'+it.partition
     if (!getChildDevice(deviceId)) {
       addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": "Honeywell Security", label: "Honeywell Security", completedSetup: true])
-      //log.debug "Added partition device: ${deviceId}"
+      log.debug "Added partition device: ${deviceId}"
+    }
+    else {
+      log.debug "Partition device already exists: ${deviceId}"
     }
   }
 
@@ -186,7 +198,10 @@ private addChildDevices(partitions, zones) {
     if (!getChildDevice(deviceId)) {
       it.type = it.type.capitalize()
       addChildDevice("redloro-smartthings", "Honeywell Zone "+it.type, deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
-      //log.debug "Added zone device: ${deviceId}"
+      log.debug "Added zone device: ${deviceId}"
+    }
+    else {
+      log.debug "Zone device already exists: ${deviceId}"
     }
   }
 }
