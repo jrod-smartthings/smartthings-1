@@ -308,7 +308,7 @@ function AD2USB () {
     // Section 2: 80
     msg.flags = parseInt(map[2], 16);
 
-    if (msg.flags & SUPERVISION) {
+    if (msg.flags & RFX_FLAG.SUPERVISION) {
       logger('Ignoring RF supervision: '+data);
     } else if (msg.flags & RFX_FLAG.LOOP1) {
       // reset timer when new zone added
