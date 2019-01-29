@@ -235,8 +235,6 @@ private removeChildDevices() {
 }
 
 def discoverChildDevices() {
-  log.debug("A")
-  logger("a","warn")
   sendCommandPlugin('/discover')
 }
 
