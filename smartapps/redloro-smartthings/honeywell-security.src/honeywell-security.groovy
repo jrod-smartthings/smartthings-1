@@ -118,7 +118,7 @@ def updated() {
 
   if (settings.enableDiscovery) {
     //delay discovery for 2 seconds
-    logger("Running discovery in 2 seconds","warn")
+    logger("Running discovery in 2 seconds","info")
     runIn(2, discoverChildDevices)
     settings.enableDiscovery = false
   }
@@ -162,7 +162,7 @@ private sendCommandPlugin(path) {
 }
 
 private sendCommand(path) {
-  logger("Honeywell Security send command: ${path}","debug")
+  logger("Honeywell Security send command: ${path}","info")
 
   if (settings.proxyAddress.length() == 0 ||
     settings.proxyPort.length() == 0) {
@@ -193,7 +193,6 @@ private processEvent(evt) {
   }
   if (evt.type == "partition") {
     updatePartitions(evt.partition, evt.state, evt.alpha)
-    logger("Partition number ${evt.partition} reported status of ${evt.state}","debug")
     if (evt.partition == 1) {
         updateAlarmSystemStatus(evt.state)
     }
@@ -202,17 +201,17 @@ private processEvent(evt) {
 
 private addChildDevices(partitions, zones) {
   def oldChildren = getChildDevices()
-  logger("Existing children: ${oldChildren}","warn")
+  logger("Existing children: ${oldChildren}","info")
   
   
   partitions.each {
     def deviceId = 'honeywell|partition'+it.partition
     if (!getChildDevice(deviceId)) {
       addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
-      logger("Added partition device: ${deviceId}","warn")
+      logger("Added partition device: ${deviceId}","info")
     }
     else {
-      logger("Partition device already exists: ${deviceId}","debug")
+      logger("Partition device already exists: ${deviceId}","info")
     }
   }
 
@@ -221,13 +220,13 @@ private addChildDevices(partitions, zones) {
     if (!getChildDevice(deviceId)) {
       it.type = it.type.capitalize()
       addChildDevice("redloro-smartthings", "Honeywell Zone "+it.type, deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
-      logger("Added zone device: ${deviceId}","warn")
+      logger("Added zone device: ${deviceId}","info")
     }
     else {
-      logger("Zone device already exists: ${deviceId}","debug")
+      logger("Zone device already exists: ${deviceId}","info")
     }
   }
-  logger("Discovery has finished running","warn")
+  logger("Discovery has finished running","info")
 }
 
 private removeChildDevices() {
@@ -239,7 +238,7 @@ def discoverChildDevices() {
 }
 
 private updateZoneDevices(zonenum,zonestatus) {
-  logger("updateZoneDevices: ${zonenum} is ${zonestatus}","trace")
+  logger("updateZoneDevices: ${zonenum} is ${zonestatus}","debug")
   def zonedevice = getChildDevice("honeywell|zone${zonenum}")
   if (zonedevice) {
     zonedevice.zone("${zonestatus}")
@@ -247,7 +246,7 @@ private updateZoneDevices(zonenum,zonestatus) {
 }
 
 private updatePartitions(partitionnum, partitionstatus, panelalpha) {
-  logger("updatePartitions: ${partitionnum} is ${partitionstatus}","trace")
+  logger("updatePartitions: ${partitionnum} is ${partitionstatus}","debug")
   def partitionDevice = getChildDevice("honeywell|partition${partitionnum}")
   if (partitionDevice) {
     partitionDevice.partition("${partitionstatus}", "${panelalpha}")
