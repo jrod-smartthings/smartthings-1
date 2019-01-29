@@ -242,6 +242,8 @@ function AD2USB () {
         keypad_update(data);
       } else if (data.match(/^!RFX/)) {
         rfx_update(data);
+      } else if (data.match(/^!REL/)) {
+        rel_update(data);
       }
     } catch (err) {
       logger('Error: '+err);
@@ -329,6 +331,40 @@ function AD2USB () {
     }
   }
 
+  //Relays
+  function rel_update(data) {
+    var map = data.split(/[:,]+/);
+    if (map.length !== 4) {
+      logger('Ignoring invalid data: '+data);
+      return;
+    }
+
+    var msg = {};
+    msg.partitionNumber = 1;
+    
+    msg.userOrZone = map[1]+map[2];
+        
+    msg.flags = parseInt(map[3]);
+    
+    if (msg.flags) {
+      // reset timer when new zone added
+      //panel.timer[msg.userOrZone] = 0;
+      //for (var n in panel.timer) {
+      //  panel.timer[n] = 0;
+      //}
+      
+      // notify
+      updateZone(msg.partitionNumber, msg.userOrZone, 'open');
+      //updatePartition(msg.partitionNumber, 'notready', 'FAULT '+msg.serial+' '+msg.zone.name.toUpperCase());
+    } else if (!msg.flags) {
+      // delete timer
+      //delete panel.timer[msg.userOrZone];
+
+      // notify
+      updateZone(msg.partitionNumber, msg.userOrZone, 'closed');
+    }
+  }
+  
   function keypad_update(data) {
     //logger('Execute keypad_update: '+data);
     var map = data.split(',');
