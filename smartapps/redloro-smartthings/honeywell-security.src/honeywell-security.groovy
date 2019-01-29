@@ -144,8 +144,8 @@ def lanResponseHandler(evt) {
 
   def headers = getHttpHeaders(map.headers);
   def body = getHttpBody(map.body);
-  logger("SmartThings Node Proxy: ${evt.stringValue}","trace")
-  logger("Headers: ${headers}","trace")
+  //logger("SmartThings Node Proxy: ${evt.stringValue}","trace")
+  //logger("Headers: ${headers}","trace")
   logger("Body: ${body}","debug")
 
   //verify that this message is for this plugin
@@ -153,7 +153,7 @@ def lanResponseHandler(evt) {
     return
   }
 
-  logger("Honeywell Security event: ${evt.stringValue}","trace")
+  //logger("Honeywell Security event: ${evt.stringValue}","trace")
   processEvent(body)
 }
 
@@ -238,7 +238,7 @@ def discoverChildDevices() {
 }
 
 private updateZoneDevices(zonenum,zonestatus) {
-  logger("updateZoneDevices: ${zonenum} is ${zonestatus}","debug")
+  //logger("updateZoneDevices: ${zonenum} is ${zonestatus}","debug")
   def zonedevice = getChildDevice("honeywell|zone${zonenum}")
   if (zonedevice) {
     zonedevice.zone("${zonestatus}")
@@ -246,7 +246,7 @@ private updateZoneDevices(zonenum,zonestatus) {
 }
 
 private updatePartitions(partitionnum, partitionstatus, panelalpha) {
-  logger("updatePartitions: ${partitionnum} is ${partitionstatus}","debug")
+  //logger("updatePartitions: ${partitionnum} is ${partitionstatus}","debug")
   def partitionDevice = getChildDevice("honeywell|partition${partitionnum}")
   if (partitionDevice) {
     partitionDevice.partition("${partitionstatus}", "${panelalpha}")
