@@ -162,7 +162,7 @@ private sendCommandPlugin(path) {
 }
 
 private sendCommand(path) {
-  logger("Honeywell Security send command: ${path}","info")
+  //logger("Honeywell Security send command: ${path}","info")
 
   if (settings.proxyAddress.length() == 0 ||
     settings.proxyPort.length() == 0) {
