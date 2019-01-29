@@ -38,47 +38,66 @@ app.get('/', function (req, res) {
   res.status(200).json({ status: 'Envisalink Vista TPI plugin running' });
 });
 
-app.get('/disarm/:partition', function (req, res) {
-  if (req.params.partition === '1') {
+app.get('/disarm/:partition?', function (req, res) {
+  if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
+      logger("Disarm Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'1');
     }
+  } else {
+  
   }
   res.end();
 });
 
-app.get('/armAway/:partition', function (req, res) {
-  if (req.params.partition === '1') {
+app.get('/armAway/:partition?', function (req, res) {
+  if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
+      logger("ArmAway Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'2');
     }
+  } else {
+  
   }
   res.end();
 });
 
-app.get('/armStay/:partition', function (req, res) {
-  if (req.params.partition === '1') {
+app.get('/armStay/:partition?', function (req, res) {
+  String s = nconf.get('envisalink:securityCode')+'3';
+  if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
-      evl.command(nconf.get('envisalink:securityCode')+'3');
+      logger("ArmStay Default Partition");
+      evl.command(s);
+    }
+  } else {
+    for (int i = 0; i < s.length(); i++){
+      char c = s.charAt(i);
+      //send to a specific partition
     }
   }
   res.end();
 });
 
-app.get('/armInstant/:partition', function (req, res) {
-  if (req.params.partition === '1') {
+app.get('/armInstant/:partition?', function (req, res) {
+  if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
+      logger("ArmInstant Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'7');
     }
+  } else {
+  
   }
   res.end();
 });
 
-app.get('/chime/:partition', function (req, res) {
-  if (req.params.partition === '1') {
+app.get('/chime/:partition?', function (req, res) {
+  if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
+      logger("Chime Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'9');
     }
+  } else {
+  
   }
   res.end();
 });
@@ -219,7 +238,7 @@ function Envisalink () {
     }
 
     if (!cmd || cmd.length == 0) { return; }
-    //logger('TX > '+cmd);
+    logger('TX > '+cmd);
     device.write(cmd+'\n');
   }
 
