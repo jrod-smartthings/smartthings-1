@@ -58,10 +58,31 @@ def page1() {
     section("Smart Home Monitor") {
       input "enableSHM", "bool", title: "Integrate with Smart Home Monitor", required: true, defaultValue: true
     }
+    
+    section("Logging") {
+        //input "prefDebugMode", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: true
+        input (
+        	name: "configLoggingLevelIDE",
+        	title: "IDE Live Logging Level:\nMessages with this level and higher will be logged to the IDE.",
+        	type: "enum",
+        	options: [
+        	    "0" : "None",
+        	    "1" : "Error",
+        	    "2" : "Warning",
+        	    "3" : "Info",
+        	    "4" : "Debug",
+        	    "5" : "Trace"
+        	],
+        	defaultValue: "3",
+            displayDuringSetup: true,
+        	required: false
+        )
+    }
   }
 }
 
 def installed() {
+  state.loggingLevelIDE = 5
   subscribeToEvents()
 }
 
@@ -75,9 +96,10 @@ def uninstalled() {
 }
 
 def updated() {
+  state.loggingLevelIDE = (settings.configLoggingLevelIDE) ? settings.configLoggingLevelIDE.toInteger() : 3
   if (settings.enableDiscovery && settings.resetZones) {
     //remove child devices as we will reload
-    log.trace "Deleting all existing partitions and zones to prepare for fresh discovery."
+    logger("Deleting all existing partitions and zones to prepare for fresh discovery.","warn")
     removeChildDevices()
   }
 
@@ -95,7 +117,8 @@ def updated() {
   }
 
   if (settings.enableDiscovery) {
-    //delay discovery for 5 seconds
+    //delay discovery for 2 seconds
+    logger("Running discovery in 2 seconds","warn")
     runIn(2, discoverChildDevices)
     settings.enableDiscovery = false
   }
@@ -121,16 +144,16 @@ def lanResponseHandler(evt) {
 
   def headers = getHttpHeaders(map.headers);
   def body = getHttpBody(map.body);
-  //log.trace "SmartThings Node Proxy: ${evt.stringValue}"
-  //log.trace "Headers: ${headers}"
-  //log.trace "Body: ${body}"
+  logger("SmartThings Node Proxy: ${evt.stringValue}","trace")
+  logger("Headers: ${headers}","trace")
+  logger("Body: ${body}","debug")
 
   //verify that this message is for this plugin
   if (headers.'stnp-plugin' != settings.pluginType) {
     return
   }
 
-  //log.trace "Honeywell Security event: ${evt.stringValue}"
+  logger("Honeywell Security event: ${evt.stringValue}","trace")
   processEvent(body)
 }
 
@@ -139,11 +162,11 @@ private sendCommandPlugin(path) {
 }
 
 private sendCommand(path) {
-  //log.trace "Honeywell Security send command: ${path}"
+  logger("Honeywell Security send command: ${path}","debug")
 
   if (settings.proxyAddress.length() == 0 ||
     settings.proxyPort.length() == 0) {
-    log.error "SmartThings Node Proxy configuration not set!"
+    logger("SmartThings Node Proxy configuration not set!","error")
     return
   }
 
@@ -170,7 +193,7 @@ private processEvent(evt) {
   }
   if (evt.type == "partition") {
     updatePartitions(evt.partition, evt.state, evt.alpha)
-    //log.trace "Partition number ${evt.partition} reported status of ${evt.state}"
+    logger("Partition number ${evt.partition} reported status of ${evt.state}","debug")
     if (evt.partition == 1) {
         updateAlarmSystemStatus(evt.state)
     }
@@ -179,17 +202,17 @@ private processEvent(evt) {
 
 private addChildDevices(partitions, zones) {
   def oldChildren = getChildDevices()
-  log.debug("Existing children: ${oldChildren}")
+  logger("Existing children: ${oldChildren}","warn")
   
   
   partitions.each {
     def deviceId = 'honeywell|partition'+it.partition
     if (!getChildDevice(deviceId)) {
-      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": "Honeywell Security", label: "Honeywell Security", completedSetup: true])
-      log.debug "Added partition device: ${deviceId}"
+      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
+      logger("Added partition device: ${deviceId}","warn")
     }
     else {
-      log.debug "Partition device already exists: ${deviceId}"
+      logger("Partition device already exists: ${deviceId}","debug")
     }
   }
 
@@ -198,12 +221,13 @@ private addChildDevices(partitions, zones) {
     if (!getChildDevice(deviceId)) {
       it.type = it.type.capitalize()
       addChildDevice("redloro-smartthings", "Honeywell Zone "+it.type, deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
-      log.debug "Added zone device: ${deviceId}"
+      logger("Added zone device: ${deviceId}","warn")
     }
     else {
-      log.debug "Zone device already exists: ${deviceId}"
+      logger("Zone device already exists: ${deviceId}","debug")
     }
   }
+  logger("Discovery has finished running","warn")
 }
 
 private removeChildDevices() {
@@ -211,11 +235,13 @@ private removeChildDevices() {
 }
 
 def discoverChildDevices() {
+  log.debug("A")
+  logger("a","warn")
   sendCommandPlugin('/discover')
 }
 
 private updateZoneDevices(zonenum,zonestatus) {
-  //log.debug "updateZoneDevices: ${zonenum} is ${zonestatus}"
+  logger("updateZoneDevices: ${zonenum} is ${zonestatus}","trace")
   def zonedevice = getChildDevice("honeywell|zone${zonenum}")
   if (zonedevice) {
     zonedevice.zone("${zonestatus}")
@@ -223,7 +249,7 @@ private updateZoneDevices(zonenum,zonestatus) {
 }
 
 private updatePartitions(partitionnum, partitionstatus, panelalpha) {
-  //log.debug "updatePartitions: ${partitionnum} is ${partitionstatus}"
+  logger("updatePartitions: ${partitionnum} is ${partitionstatus}","trace")
   def partitionDevice = getChildDevice("honeywell|partition${partitionnum}")
   if (partitionDevice) {
     partitionDevice.partition("${partitionstatus}", "${panelalpha}")
@@ -238,7 +264,7 @@ def alarmHandler(evt) {
   if (state.alarmSystemStatus == evt.value) {
     return
   }
-
+  logger("Updating alarm status to match SHM - from ${state.alarmSystemStatus} to ${evt.value}","debug")
   state.alarmSystemStatus = evt.value
   if (evt.value == "stay") {
     sendCommandPlugin('/armStay')
@@ -268,6 +294,7 @@ private updateAlarmSystemStatus(partitionstatus) {
   }
 
   if (lastAlarmSystemStatus != state.alarmSystemStatus) {
+    logger("Updating SHM to match alarm status - from ${lastAlarmSystemStatus} to ${state.alarmSystemStatus}","debug")
     sendLocationEvent(name: "alarmSystemStatus", value: state.alarmSystemStatus)
   }
 }
@@ -304,4 +331,33 @@ private String convertIPtoHex(ipAddress) {
 
 private String convertPortToHex(port) {
   return port.toString().format( '%04x', port.toInteger() ).toUpperCase()
+}
+
+private logger(msg, level) {
+
+    switch(level) {
+        case "error":
+            if (state.loggingLevelIDE >= 1) log.error msg
+            break
+
+        case "warn":
+            if (state.loggingLevelIDE >= 2) log.warn msg
+            break
+
+        case "info":
+            if (state.loggingLevelIDE >= 3) log.info msg
+            break
+
+        case "debug":
+            if (state.loggingLevelIDE >= 4) log.debug msg
+            break
+
+        case "trace":
+            if (state.loggingLevelIDE >= 5) log.trace msg
+            break
+
+        default:
+            log.debug msg
+            break
+    }
 }
