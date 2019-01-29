@@ -63,7 +63,7 @@ app.get('/armAway/:partition?', function (req, res) {
 });
 
 app.get('/armStay/:partition?', function (req, res) {
-  String s = nconf.get('envisalink:securityCode')+'3';
+  s = nconf.get('envisalink:securityCode')+'3';
   if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
       logger("ArmStay Default Partition");
@@ -71,8 +71,9 @@ app.get('/armStay/:partition?', function (req, res) {
     }
   } else {
     for (int i = 0; i < s.length(); i++){
-      char c = s.charAt(i);
-      //send to a specific partition
+      c = s.charAt(i);
+      logger('^3,'+req.params.partition+','+c+'$');
+      //evl.command('^3,'+req.params.partition+','+c+'$');
     }
   }
   res.end();
