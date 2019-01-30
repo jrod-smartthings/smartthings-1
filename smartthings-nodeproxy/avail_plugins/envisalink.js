@@ -48,66 +48,62 @@ app.get('/disarm/:partition?', function (req, res) {
       evl.command(s+'1');
       evl.command('\^01,1\$');
     }
-  //  s = nconf.get('envisalink:securityCode')+'1';
-  //  if (!req.params.partition) {
-  //    evl.command(nconf.get('envisalink:securityCode')+'1');
-  //  } else {
-  //    for (i = 0; i < s.length; i++){
-  //      c = s.charAt(i);
-  //      evl.command('\^03,'+req.params.partition+','+c+'\$');
-  //    }
-  //  }
   }
   res.end();
 });
 
 app.get('/armAway/:partition?', function (req, res) {
-  s = nconf.get('envisalink:securityCode')+'2';
-  if (!req.params.partition) {
-    if (nconf.get('envisalink:securityCode')) {
-      evl.command(nconf.get('envisalink:securityCode')+'2');
+  if (nconf.get('envisalink:securityCode')) {
+    s = nconf.get('envisalink:securityCode');
+    if (!req.params.partition) {
+      evl.command(s+'2');
+    } else {
+      evl.command('\^01,'+req.params.partition+'\$');
+      evl.command(s+'2');
+      evl.command('\^01,1\$');
     }
-  } else {
-  
   }
   res.end();
 });
 
 app.get('/armStay/:partition?', function (req, res) {
-  s = nconf.get('envisalink:securityCode')+'3';
-  if (!req.params.partition) {
-    if (nconf.get('envisalink:securityCode')) {
-      evl.command(s);
-    }
-  } else {
-    for (i = 0; i < s.length; i++){
-      c = s.charAt(i);
-      evl.command('\^03,'+req.params.partition+','+c+'\$');
+  if (nconf.get('envisalink:securityCode')) {
+    s = nconf.get('envisalink:securityCode');
+    if (!req.params.partition) {
+      evl.command(s+'3');
+    } else {
+      evl.command('\^01,'+req.params.partition+'\$');
+      evl.command(s+'3');
+      evl.command('\^01,1\$');
     }
   }
   res.end();
 });
 
 app.get('/armInstant/:partition?', function (req, res) {
-  s = nconf.get('envisalink:securityCode')+'7';
-  if (!req.params.partition) {
-    if (nconf.get('envisalink:securityCode')) {
-      evl.command(nconf.get('envisalink:securityCode')+'7');
+  if (nconf.get('envisalink:securityCode')) {
+    s = nconf.get('envisalink:securityCode');
+    if (!req.params.partition) {
+      evl.command(s+'7');
+    } else {
+      evl.command('\^01,'+req.params.partition+'\$');
+      evl.command(s+'7');
+      evl.command('\^01,1\$');
     }
-  } else {
-  
   }
   res.end();
 });
 
 app.get('/chime/:partition?', function (req, res) {
-  s = nconf.get('envisalink:securityCode')+'9';
-  if (!req.params.partition) {
-    if (nconf.get('envisalink:securityCode')) {
-      evl.command(nconf.get('envisalink:securityCode')+'9');
+  if (nconf.get('envisalink:securityCode')) {
+    s = nconf.get('envisalink:securityCode');
+    if (!req.params.partition) {
+      evl.command(s+'9');
+    } else {
+      evl.command('\^01,'+req.params.partition+'\$');
+      evl.command(s+'9');
+      evl.command('\^01,1\$');
     }
-  } else {
-  
   }
   res.end();
 });
@@ -263,7 +259,7 @@ function Envisalink () {
    */
   function read(data) {
     if (data.length == 0) { return; }
-    //logger('RX < '+data);
+    logger('RX < '+data);
 
     var code = data;
     if (data[0] == '%' || data[0] == '^') {
