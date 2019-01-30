@@ -40,15 +40,23 @@ app.get('/', function (req, res) {
 
 app.get('/disarm/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode')+'1';
+    s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
-      evl.command(nconf.get('envisalink:securityCode')+'1');
+      evl.command(s+'1');
     } else {
-      for (i = 0; i < s.length; i++){
-        c = s.charAt(i);
-        evl.command('\^03,'+req.params.partition+','+c+'\$');
-      }
+      evl.command('\^01,'+req.params.partition+'\$');
+      evl.command(s+'1');
+      evl.command('\^01,1\$');
     }
+  //  s = nconf.get('envisalink:securityCode')+'1';
+  //  if (!req.params.partition) {
+  //    evl.command(nconf.get('envisalink:securityCode')+'1');
+  //  } else {
+  //    for (i = 0; i < s.length; i++){
+  //      c = s.charAt(i);
+  //      evl.command('\^03,'+req.params.partition+','+c+'\$');
+  //    }
+  //  }
   }
   res.end();
 });
