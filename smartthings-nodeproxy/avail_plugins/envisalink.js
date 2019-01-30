@@ -72,8 +72,7 @@ app.get('/armStay/:partition?', function (req, res) {
   } else {
     for (i = 0; i < s.length; i++){
       c = s.charAt(i);
-      //logger('\^3,'+req.params.partition+','+c+'\$');
-      evl.command('\^3,'+req.params.partition+','+c+'\$');
+      evl.command('\^03,'+req.params.partition+','+c+'\$');
     }
   }
   res.end();
