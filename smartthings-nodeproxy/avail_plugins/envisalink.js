@@ -39,21 +39,24 @@ app.get('/', function (req, res) {
 });
 
 app.get('/disarm/:partition?', function (req, res) {
-  if (!req.params.partition) {
-    if (nconf.get('envisalink:securityCode')) {
-      logger("Disarm Default Partition");
+  if (nconf.get('envisalink:securityCode')) {
+    s = nconf.get('envisalink:securityCode')+'1';
+    if (!req.params.partition) {
       evl.command(nconf.get('envisalink:securityCode')+'1');
+    } else {
+      for (i = 0; i < s.length; i++){
+        c = s.charAt(i);
+        evl.command('\^03,'+req.params.partition+','+c+'\$');
+      }
     }
-  } else {
-  
   }
   res.end();
 });
 
 app.get('/armAway/:partition?', function (req, res) {
+  s = nconf.get('envisalink:securityCode')+'2';
   if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
-      logger("ArmAway Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'2');
     }
   } else {
@@ -66,7 +69,6 @@ app.get('/armStay/:partition?', function (req, res) {
   s = nconf.get('envisalink:securityCode')+'3';
   if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
-      logger("ArmStay Default Partition");
       evl.command(s);
     }
   } else {
@@ -79,9 +81,9 @@ app.get('/armStay/:partition?', function (req, res) {
 });
 
 app.get('/armInstant/:partition?', function (req, res) {
+  s = nconf.get('envisalink:securityCode')+'7';
   if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
-      logger("ArmInstant Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'7');
     }
   } else {
@@ -91,9 +93,9 @@ app.get('/armInstant/:partition?', function (req, res) {
 });
 
 app.get('/chime/:partition?', function (req, res) {
+  s = nconf.get('envisalink:securityCode')+'9';
   if (!req.params.partition) {
     if (nconf.get('envisalink:securityCode')) {
-      logger("Chime Default Partition");
       evl.command(nconf.get('envisalink:securityCode')+'9');
     }
   } else {
@@ -114,7 +116,8 @@ app.get('/trigger/:output', function (req, res) {
   res.end();
 });
 
-app.get('/bypass/:partition/:zones', function (req, res) {
+app.get('/bypass/:zones/:partition?', function (req, res) {
+  s = nconf.get('envisalink:securityCode')+'6';
   if (req.params.partition === '1') {
     if (nconf.get('envisalink:securityCode')) {
       var zones = req.params.zones.split(',').map(function(x) {
