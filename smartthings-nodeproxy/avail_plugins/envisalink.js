@@ -40,7 +40,7 @@ app.get('/', function (req, res) {
 
 app.get('/disarm/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode');
+    var s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
       evl.command(s+'1');
     } else {
@@ -54,7 +54,7 @@ app.get('/disarm/:partition?', function (req, res) {
 
 app.get('/armAway/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode');
+    var s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
       evl.command(s+'2');
     } else {
@@ -68,7 +68,7 @@ app.get('/armAway/:partition?', function (req, res) {
 
 app.get('/armStay/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode');
+    var s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
       evl.command(s+'3');
     } else {
@@ -82,7 +82,7 @@ app.get('/armStay/:partition?', function (req, res) {
 
 app.get('/armInstant/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode');
+    var s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
       evl.command(s+'7');
     } else {
@@ -96,7 +96,7 @@ app.get('/armInstant/:partition?', function (req, res) {
 
 app.get('/chime/:partition?', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
-    s = nconf.get('envisalink:securityCode');
+    var s = nconf.get('envisalink:securityCode');
     if (!req.params.partition) {
       evl.command(s+'9');
     } else {
@@ -121,16 +121,20 @@ app.get('/trigger/:output', function (req, res) {
 });
 
 app.get('/bypass/:zones/:partition?', function (req, res) {
-  s = nconf.get('envisalink:securityCode')+'6';
-  if (req.params.partition === '1') {
-    if (nconf.get('envisalink:securityCode')) {
-      var zones = req.params.zones.split(',').map(function(x) {
-        x = ('00'+x.trim()).slice(-2);
-        return (x === '00') ? '' : x;
-      }).join('');
+  if (nconf.get('envisalink:securityCode')) {
+    var zones = req.params.zones.split(',').map(function(x) {
+      x = ('00'+x.trim()).slice(-2);
+      return (x === '00') ? '' : x;
+    }).join('');
 
-      if (zones) {
-        evl.command(nconf.get('envisalink:securityCode')+'6'+zones);
+    if (zones) {
+      var s = nconf.get('envisalink:securityCode');
+      if (!req.params.partition) {
+        evl.command(s+'6'+zones);
+      } else {
+        evl.command('\^01,'+req.params.partition+'\$');
+        evl.command(s+'6'+zones);
+        evl.command('\^01,1\$');
       }
     }
   }
