@@ -45,6 +45,9 @@ def page1() {
       input "securityCode", "password", title: "Security Code", description: "User code to arm/disarm the security panel", required: false
       input "resetZones", "bool", title: "Delete Existing Partitions/Zones During Discovery (WARNING: all existing zones will be removed)", required: false, defaultValue: false
       input "enableDiscovery", "bool", title: "Discover Zones", required: false, defaultValue: false
+      if(state.installed) {
+      	input "enableAutoDiscovery", "bool", title: "Automatically add missing zones when faulted", required: false, defaultValue: false
+      }
     }
 
     if (pluginType == "envisalink") {
@@ -60,7 +63,6 @@ def page1() {
     }
     
     section("Logging") {
-        //input "prefDebugMode", "bool", title: "Enable debug logging?", defaultValue: true, displayDuringSetup: true
         input (
         	name: "configLoggingLevelIDE",
         	title: "IDE Live Logging Level:\nMessages with this level and higher will be logged to the IDE.",
@@ -83,6 +85,7 @@ def page1() {
 
 def installed() {
   state.loggingLevelIDE = 5
+  state.installed = true
   subscribeToEvents()
 }
 
@@ -97,6 +100,7 @@ def uninstalled() {
 
 def updated() {
   state.loggingLevelIDE = (settings.configLoggingLevelIDE) ? settings.configLoggingLevelIDE.toInteger() : 3
+  state.installed = true
   if (settings.enableDiscovery && settings.resetZones) {
     //remove child devices as we will reload
     logger("Deleting all existing partitions and zones to prepare for fresh discovery.","warn")
@@ -242,6 +246,13 @@ private updateZoneDevices(zonenum,zonestatus) {
   def zonedevice = getChildDevice("honeywell|zone${zonenum}")
   if (zonedevice) {
     zonedevice.zone("${zonestatus}")
+  } else {
+  	logger("Unknown zone reported status: Zone ${zonenum}","error")
+    if(enableAutoDiscovery) {
+      def deviceId = 'honeywell|zone'+zonenum
+      addChildDevice("redloro-smartthings", "Honeywell Zone Contact", deviceId, hostHub.id, ["name": deviceId, label: deviceId, completedSetup: true])
+      logger("Added zone device: ${deviceId}","info")
+    }
   }
 }
 
