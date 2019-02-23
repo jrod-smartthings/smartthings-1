@@ -70,7 +70,8 @@
     "panelConfig": {              // Set this to manual define partitions and zones
       "type": "discover",
       "partitions": [
-        {"partition": 1, "name": "Security Panel"}
+        {"partition": 1, "name": "Partition 1"},
+        {"partition": 2, "name": "Partition 2"}
       ],
       "zones": [
         {"zone": 1, "type": "smoke", "name": "Smoke Detector"},
