@@ -101,19 +101,35 @@ def partition(String state, String alpha) {
 }
 
 def armAway() {
-  parent.sendCommandPlugin('/armAway');
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/armAway');
+	} else {
+		parent.sendCommandPlugin("/armAway?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }
 
 def armStay() {
-  parent.sendCommandPlugin('/armStay');
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/armStay');
+	} else {
+		parent.sendCommandPlugin("/armStay?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }
 
 def armInstant() {
-  parent.sendCommandPlugin('/armInstant');
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/armInstant');
+	} else {
+		parent.sendCommandPlugin("/armInstant?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }
 
 def disarm() {
-  parent.sendCommandPlugin('/disarm');
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/disarm');
+	} else {
+		parent.sendCommandPlugin("/disarm?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }
 
 def trigger1() {
@@ -125,9 +141,17 @@ def trigger2() {
 }
 
 def chime() {
-  parent.sendCommandPlugin('/chime');
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/chime');
+	} else {
+		parent.sendCommandPlugin("/chime?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }
 
 def bypass() {
-  parent.sendCommandPlugin('/bypass/'+settings.bypassZones);
+	if (device.getDeviceNetworkId().reverse().take(1)=="1"){
+		parent.sendCommandPlugin('/bypass/'+settings.bypassZones);
+	} else {
+		parent.sendCommandPlugin("/bypass/"+settings.bypassZones+"?partition=${device.getDeviceNetworkId().reverse().take(1)}");
+	}
 }

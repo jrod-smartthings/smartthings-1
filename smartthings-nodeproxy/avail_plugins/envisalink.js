@@ -182,7 +182,7 @@ evl.init();
 function Envisalink () {
   var self = this;
   var locked = false;
-  var panel = {alpha: '', timer: [], partition: 1, zones: []};
+  var panel = {alpha: [], timer: [], partition: 1, zones: []};
   var device = null;
   var deviceRequest = null;
   var deviceResponse = null;
@@ -249,7 +249,7 @@ function Envisalink () {
     }
 
     if (!cmd || cmd.length == 0) { return; }
-    logger('TX > '+cmd);
+    //logger('TX > '+cmd);
     device.write(cmd+'\n');
   }
 
@@ -263,7 +263,7 @@ function Envisalink () {
    */
   function read(data) {
     if (data.length == 0) { return; }
-    logger('RX < '+data);
+    //logger('RX < '+data);
 
     var code = data;
     if (data[0] == '%' || data[0] == '^') {
@@ -398,7 +398,7 @@ function Envisalink () {
     //////////
     // PARTITION UPDATE
     //////////
-    if (panel.alpha != msg.alpha) {
+    if (panel.alpha[msg.partitionNumber] != msg.alpha) {
       //notify
       updatePartition(msg.partitionNumber, getPartitionState(msg.flags, msg.alpha), msg.alpha);
     }
@@ -479,7 +479,7 @@ function Envisalink () {
   }
 
   function updatePartition(partitionNumber, state, alpha) {
-    panel.alpha = alpha;
+    panel.alpha[partitionNumber] = alpha;
 
     var msg = JSON.stringify({type: 'partition', partition: partitionNumber, state: state, alpha: alpha});
     logger(msg);
