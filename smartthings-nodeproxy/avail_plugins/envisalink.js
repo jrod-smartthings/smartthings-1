@@ -336,10 +336,11 @@ function Envisalink () {
 
     // all zones are closed
     if (msg.dscCode == 'READY') {
-      panel.timer = [];
+      //panel.timer = [];
       for (var n in panel.zones){
-        if (panel.zones[n] != 'closed') {
+        if (panel.zones[n].zoneStatus != 'closed' && panel.zones[n].zonePartition == msg.partitionNumber) {
           // notify
+          delete panel.timer[n];
           updateZone(msg.partitionNumber, n, 'closed');
         }
       }
@@ -347,7 +348,16 @@ function Envisalink () {
 
     // one or more zones are open
     if (msg.dscCode == '' && !isNaN(msg.userOrZone)) {
-      if (panel.zones[msg.userOrZone] != 'open') {
+    	if (!panel.zones[msg.userOrZone]) {
+    		// reset timer when new zone added
+            panel.timer[msg.userOrZone] = 0;
+            for (var n in panel.timer) {
+              panel.timer[n] = 0;
+            }
+
+            // notify
+            updateZone(msg.partitionNumber, msg.userOrZone, 'open');
+    	} else if (panel.zones[msg.userOrZone].zoneStatus != 'open') {
         // reset timer when new zone added
         panel.timer[msg.userOrZone] = 0;
         for (var n in panel.timer) {
@@ -379,7 +389,7 @@ function Envisalink () {
 
     // zone in alarm
     if (msg.dscCode == 'IN_ALARM' && !isNaN(msg.userOrZone)) {
-      if (panel.zones[msg.userOrZone] != 'alarm') {
+      if (panel.zones[msg.userOrZone].zoneStatus != 'alarm') {
         // notify
         updateZone(msg.partitionNumber, msg.userOrZone, 'alarm');
       }
@@ -435,7 +445,7 @@ function Envisalink () {
 
       // use zone timer dump as backup to check for orphaned zones
       if (msg.zoneStatus == 'closed' &&
-          panel.zones[msg.zoneNumber] != 'closed') {
+          panel.zones[msg.zoneNumber].zoneStatus != 'closed') {
         // notify
         queue.push({
           partition: panel.partition,
@@ -461,7 +471,7 @@ function Envisalink () {
    * Helper Functions
    */
   function updateZone(partitionNumber, zoneNumber, state) {
-    panel.zones[zoneNumber] = state;
+    panel.zones[zoneNumber] = {zoneStatus:state, zonePartition:partitionNumber};
 
     var msg = JSON.stringify({type: 'zone', partition: partitionNumber, zone: zoneNumber, state: state});
     logger(msg);
