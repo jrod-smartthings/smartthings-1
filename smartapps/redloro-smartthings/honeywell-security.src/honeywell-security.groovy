@@ -261,6 +261,13 @@ private updatePartitions(partitionnum, partitionstatus, panelalpha) {
   def partitionDevice = getChildDevice("honeywell|partition${partitionnum}")
   if (partitionDevice) {
     partitionDevice.partition("${partitionstatus}", "${panelalpha}")
+  } else {
+  	logger("Unknown partition reported status: Partition ${partitionnum}","error")
+    if(enableAutoDiscovery) {
+      def deviceId = 'honeywell|partition'+partitionnum
+      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": deviceId, label: deviceId, completedSetup: true])
+      logger("Added partition device: ${deviceId}","info")
+    }
   }
 }
 
