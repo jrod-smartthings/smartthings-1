@@ -80,6 +80,34 @@ app.get('/armStay', function (req, res) {
   res.end();
 });
 
+app.get('/armNight', function (req, res) {
+  if (nconf.get('envisalink:securityCode')) {
+    var s = nconf.get('envisalink:securityCode');
+	if (!req.query.partition) {
+	  evl.command(s+'33');
+	} else {
+	  evl.command('\^01,'+req.query.partition+'\$');
+	  evl.command(s+'33');
+	  evl.command('\^01,1\$');
+    }
+  }
+  res.end();
+});
+
+app.get('/armMax', function (req, res) {
+  if (nconf.get('envisalink:securityCode')) {
+    var s = nconf.get('envisalink:securityCode');
+	if (!req.query.partition) {
+	  evl.command(s+'4');
+	} else {
+	  evl.command('\^01,'+req.query.partition+'\$');
+	  evl.command(s+'4');
+	  evl.command('\^01,1\$');
+    }
+  }
+  res.end();
+});
+
 app.get('/armInstant', function (req, res) {
   if (nconf.get('envisalink:securityCode')) {
     var s = nconf.get('envisalink:securityCode');
