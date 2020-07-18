@@ -13,21 +13,24 @@
  *  for the specific language governing permissions and limitations under the License.
  */
 metadata {
-  definition (name: "Honeywell Partition", namespace: "redloro-smartthings", author: "redloro@gmail.com") {
-    capability "Button"
-    capability "Alarm"
-    capability "Sensor"
-    capability "Actuator"
+  definition (name: "Honeywell Partition", namespace: "platinummassive43262", author: "redloro@gmail.com", vid: "a259c7ac-cf5c-31e3-9ae9-55b118c6f1f0", mnmn: "SmartThingsCommunity") {
+    capability "platinummassive43262.alarmState"
+    capability "platinummassive43262.longMemo"
+    capability "platinummassive43262.disarm"
+    capability "platinummassive43262.armAway"
+    capability "platinummassive43262.armStay"
+    capability "platinummassive43262.armInstant"
+    capability "platinummassive43262.armMax"
+    capability "platinummassive43262.armNight"
+    capability "platinummassive43262.chime"
+    capability "platinummassive43262.bypass"
+    capability "Health Check"
+    
+    attribute "dscpartition", "enum", ["ready", "notready", "arming", "armedstay", "armedaway", "armedinstant", "armedmax", "alarmcleared", "alarm"]
     
     command "partition"
-    command "armStay"
-    command "armAway"
-    command "armInstant"
-    command "disarm"
     command "trigger1"
     command "trigger2"
-    command "chime"
-    command "bypass"
   }
 
   tiles(scale: 2) {
@@ -94,8 +97,10 @@ metadata {
 }
 
 def partition(String state, String alpha) {
-  sendEvent (name: "dscpartition", value: "${state}", descriptionText: "${alpha}")
+  sendEvent (name: "dscpartition", value: "${state}", descriptionText: "${alpha}", displayed: false)
   sendEvent (name: "panelStatus", value: "${alpha}", displayed: false)
+  sendEvent (name: "alarmState", value: "${state}", descriptionText: "${alpha}")
+  sendEvent (name: "longMemo", value: "${alpha}", displayed: false)
 }
 
 def armAway() {
