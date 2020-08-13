@@ -25,6 +25,10 @@ metadata {
     capability "platinummassive43262.chime"
     capability "platinummassive43262.bypass"
     capability "Health Check"
+    capability "Button"
+    capability "Alarm"
+    capability "Sensor"
+    capability "Actuator"
     
     attribute "dscpartition", "enum", ["ready", "notready", "arming", "armedstay", "armedaway", "armedinstant", "armedmax", "alarmcleared", "alarm"]
     
