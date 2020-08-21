@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  */
 metadata {
-  definition (name: "Honeywell Partition - New to Publish", namespace: "redloro-smartthings", author: "redloro@gmail.com", ocfDeviceType: "x.com.st.d.remotecontroller", vid: "fc0c226e-fef6-3cc4-8a53-3757486920c1", mnmn: "SmartThingsCommunity") {
+  definition (name: "Honeywell Partition", namespace: "redloro-smartthings", author: "redloro@gmail.com", ocfDeviceType: "x.com.st.d.remotecontroller", vid: "fc0c226e-fef6-3cc4-8a53-3757486920c1", mnmn: "SmartThingsCommunity") {
     capability "platinummassive43262.alarmState"
     capability "platinummassive43262.longMemo"
     capability "platinummassive43262.securityPartitionCommands"
