@@ -2,6 +2,7 @@
  *  SmartThings SmartApp: Honeywell Security
  *
  *  Author: redloro@gmail.com
+ *  Modifications made by: jrodriguez142514-dev
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,11 +13,14 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  */
+ //***********Modifications Made By jrodriguez142514-dev***************
+ 
+ 
 import groovy.json.JsonSlurper
 
 definition(
   name: "Honeywell Security",
-  namespace: "redloro-smartthings",
+  namespace: "jrod-smartthings",
   author: "redloro@gmail.com",
   description: "Honeywell Security SmartApp",
   category: "Safety & Security",
@@ -33,7 +37,24 @@ preferences {
 def page1() {
   dynamicPage(name: "page1", install: true, uninstall: true) {
     section("SmartThings Hub") {
-      input "hostHub", "hub", title: "Select Hub", multiple: false, required: true
+	//***********Changes Made By jrodriguez142514-dev***************
+      
+      if (getHubID() == null){
+            input(
+                name		: "hostHub"
+                ,type		: "hub"
+                ,title		: "Select your hub"
+                ,multiple		: false
+                ,required		: true
+                ,submitOnChange	: true
+            )
+            
+            
+         } else {
+         	paragraph(getHubAddress())
+         	paragraph("HUB ID: " + getHubID())
+         }
+	//***********Changes Made By jrodriguez142514-dev***************
     }
     section("SmartThings Node Proxy") {
       input "proxyAddress", "text", title: "Proxy Address", description: "(ie. 192.168.1.10)", required: true
@@ -53,7 +74,7 @@ def page1() {
     if (pluginType == "envisalink") {
       section("Envisalink Vista TPI") {
         input "evlAddress", "text", title: "Host Address", description: "(ie. 192.168.1.11)", required: false
-        input "evlPort", "text", title: "Host Port", description: "(ie. 4025)", required: false
+        input "evlPort", "text", title: "Host Port", description: "(ie. 4025)", required: false, defaultValue: "4025"
         input "evlPassword", "password", title: "Password", description: "", required: false
       }
     }
@@ -82,6 +103,43 @@ def page1() {
     }
   }
 }
+
+//***********Changes Made By jrodriguez142514-dev***************
+def getHubID(){
+    def hubID
+    if (myHub){
+        hubID = myHub.id
+    } else {
+        def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL } 
+        
+        if (hubs.size() == 1) hubID = hubs[0].id 
+    }
+    
+    return hubID
+}
+//***********Changes Made By jrodriguez142514-dev***************
+
+//***********Changes Made By jrodriguez142514-dev***************
+def getHubAddress(){
+    def hubIP
+    def hubPort
+    def hubAddress
+    if (myHub){
+        hubIP = myHub.localIP
+        hubPort = myHub.localSrvPortTCP
+        hubAddress = hubIP + ":" + hubPort
+    } else {
+        def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL } 
+        
+        if (hubs.size() == 1) {
+        	hubIP = hubs[0].localIP
+            hubPort = hubs[0].localSrvPortTCP
+            hubAddress = hubIP + ":" + hubPort
+        }
+    }
+    return hubAddress
+}
+//***********Changes Made By jrodriguez142514-dev***************
 
 def installed() {
   state.loggingLevelIDE = 5
@@ -207,11 +265,12 @@ private addChildDevices(partitions, zones) {
   def oldChildren = getChildDevices()
   logger("Existing children: ${oldChildren}","info")
   
-  
+  //***********Changes Made By jrodriguez142514-dev***************
+  //changed hostHub.id on line 273 to hostHub
   partitions.each {
     def deviceId = 'honeywell|partition'+it.partition
     if (!getChildDevice(deviceId)) {
-      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
+      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub, ["name": it.name, label: it.name, completedSetup: true])
       logger("Added partition device: ${deviceId}","info")
     }
     else {
@@ -219,11 +278,13 @@ private addChildDevices(partitions, zones) {
     }
   }
 
+  //***********Changes Made By jrodriguez142514-dev***************
+  //changed hostHub.id on line 287 to hostHub
   zones.each {
     def deviceId = 'honeywell|zone'+it.zone
     if (!getChildDevice(deviceId)) {
       it.type = it.type.capitalize()
-      addChildDevice("redloro-smartthings", "Honeywell Zone "+it.type, deviceId, hostHub.id, ["name": it.name, label: it.name, completedSetup: true])
+      addChildDevice("redloro-smartthings", "Honeywell Zone "+it.type, deviceId, hostHub, ["name": it.name, label: it.name, completedSetup: true])
       logger("Added zone device: ${deviceId}","info")
     }
     else {
@@ -241,6 +302,8 @@ def discoverChildDevices() {
   sendCommandPlugin('/discover')
 }
 
+//***********Changes Made By jrodriguez142514-dev***************
+//changed hostHub.id on line 316 to hostHub
 private updateZoneDevices(zonenum,zonestatus) {
   //logger("updateZoneDevices: ${zonenum} is ${zonestatus}","debug")
   def zonedevice = getChildDevice("honeywell|zone${zonenum}")
@@ -250,12 +313,14 @@ private updateZoneDevices(zonenum,zonestatus) {
   	logger("Unknown zone reported status: Zone ${zonenum}","error")
     if(enableAutoDiscovery) {
       def deviceId = 'honeywell|zone'+zonenum
-      addChildDevice("redloro-smartthings", "Honeywell Zone Contact", deviceId, hostHub.id, ["name": deviceId, label: deviceId, completedSetup: true])
+      addChildDevice("redloro-smartthings", "Honeywell Zone Contact", deviceId, hostHub, ["name": deviceId, label: deviceId, completedSetup: true])
       logger("Added zone device: ${deviceId}","info")
     }
   }
 }
 
+//***********Changes Made By jrodriguez142514-dev***************
+//changed hostHub.id on line 333 to hostHub
 private updatePartitions(partitionnum, partitionstatus, panelalpha) {
   //logger("updatePartitions: ${partitionnum} is ${partitionstatus}","debug")
   def partitionDevice = getChildDevice("honeywell|partition${partitionnum}")
@@ -265,7 +330,7 @@ private updatePartitions(partitionnum, partitionstatus, panelalpha) {
   	logger("Unknown partition reported status: Partition ${partitionnum}","error")
     if(enableAutoDiscovery) {
       def deviceId = 'honeywell|partition'+partitionnum
-      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub.id, ["name": deviceId, label: deviceId, completedSetup: true])
+      addChildDevice("redloro-smartthings", "Honeywell Partition", deviceId, hostHub, ["name": deviceId, label: deviceId, completedSetup: true])
       logger("Added partition device: ${deviceId}","info")
     }
   }
@@ -337,7 +402,8 @@ private getProxyAddress() {
 }
 
 private getNotifyAddress() {
-  return settings.hostHub.localIP + ":" + settings.hostHub.localSrvPortTCP
+  //return settings.hostHub.localIP + ":" + settings.hostHub.localSrvPortTCP
+  return getHubAddress()
 }
 
 private String convertIPtoHex(ipAddress) {
